@@ -20,8 +20,7 @@ public class ShopUnit {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id", referencedColumnName = "id")
     private ShopUnit parent;
-    @ManyToOne
-    @JoinColumn(name = "type_id")
+    @Enumerated(EnumType.STRING)
     private ShopUnitType type;
 
     @Column(name = "price")
