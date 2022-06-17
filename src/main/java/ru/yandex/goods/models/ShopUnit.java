@@ -1,52 +1,45 @@
 package ru.yandex.goods.models;
 
-import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.Set;
+import java.util.UUID;
 
-@Table(name = "shopUnit")
-@Entity
 public class ShopUnit {
-
-    @Id
-    private String id;
-
-    @Column(name = "name")
+    private UUID id;
     private String name;
-
-    @Column(name = "date")
     private LocalDateTime date;
-
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "parent_id", referencedColumnName = "id")
-    private ShopUnit parent;
-    @Enumerated(EnumType.STRING)
+    private UUID parentId;
     private ShopUnitType type;
-
-    @Column(name = "price")
     private Integer price;
-
-    @OneToMany(fetch = FetchType.EAGER)
     private Set<ShopUnit> children;
 
     public ShopUnit() {
     }
 
-    public ShopUnit(String id, String name, LocalDateTime date, ShopUnit parent, ShopUnitType type, Integer price, Set<ShopUnit> children) {
+    public ShopUnit(UUID id, String name, LocalDateTime date, UUID parentId, ShopUnitType type, Integer price) {
         this.id = id;
         this.name = name;
         this.date = date;
-        this.parent = parent;
+        this.parentId = parentId;
+        this.type = type;
+        this.price = price;
+    }
+
+    public ShopUnit(UUID id, String name, LocalDateTime date, UUID parentId, ShopUnitType type, Integer price, Set<ShopUnit> children) {
+        this.id = id;
+        this.name = name;
+        this.date = date;
+        this.parentId = parentId;
         this.type = type;
         this.price = price;
         this.children = children;
     }
 
-    public String getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 
@@ -66,12 +59,12 @@ public class ShopUnit {
         this.date = date;
     }
 
-    public ShopUnit getParent() {
-        return parent;
+    public UUID getParentId() {
+        return parentId;
     }
 
-    public void setParent(ShopUnit parent) {
-        this.parent = parent;
+    public void setParentId(UUID parentId) {
+        this.parentId = parentId;
     }
 
     public ShopUnitType getType() {
@@ -108,8 +101,8 @@ public class ShopUnit {
         if (!id.equals(shopUnit.id)) return false;
         if (!name.equals(shopUnit.name)) return false;
         if (!date.equals(shopUnit.date)) return false;
-        if (parent != null ? !parent.equals(shopUnit.parent) : shopUnit.parent != null) return false;
-        if (!type.equals(shopUnit.type)) return false;
+        if (parentId != null ? !parentId.equals(shopUnit.parentId) : shopUnit.parentId != null) return false;
+        if (type != shopUnit.type) return false;
         if (price != null ? !price.equals(shopUnit.price) : shopUnit.price != null) return false;
         return children != null ? children.equals(shopUnit.children) : shopUnit.children == null;
     }
@@ -119,7 +112,7 @@ public class ShopUnit {
         int result = id.hashCode();
         result = 31 * result + name.hashCode();
         result = 31 * result + date.hashCode();
-        result = 31 * result + (parent != null ? parent.hashCode() : 0);
+        result = 31 * result + (parentId != null ? parentId.hashCode() : 0);
         result = 31 * result + type.hashCode();
         result = 31 * result + (price != null ? price.hashCode() : 0);
         result = 31 * result + (children != null ? children.hashCode() : 0);
@@ -129,10 +122,10 @@ public class ShopUnit {
     @Override
     public String toString() {
         return "ShopUnit{" +
-                "id='" + id + '\'' +
+                "id=" + id +
                 ", name='" + name + '\'' +
                 ", date=" + date +
-                ", parent=" + parent +
+                ", parentId=" + parentId +
                 ", type=" + type +
                 ", price=" + price +
                 ", children=" + children +
