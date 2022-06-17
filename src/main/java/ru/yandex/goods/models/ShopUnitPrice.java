@@ -20,7 +20,7 @@ public class ShopUnitPrice {
     private LocalDateTime date;
 
     @Column(name = "price")
-    private int price;
+    private Integer price;
 
     public ShopUnitPrice() {
     }
@@ -30,7 +30,7 @@ public class ShopUnitPrice {
         this.date = date;
     }
 
-    public ShopUnitPrice(int id, UUID unitId, LocalDateTime date, int price) {
+    public ShopUnitPrice(int id, UUID unitId, LocalDateTime date, Integer price) {
         this.id = id;
         this.unitId = unitId;
         this.date = date;
@@ -77,9 +77,9 @@ public class ShopUnitPrice {
         ShopUnitPrice that = (ShopUnitPrice) o;
 
         if (id != that.id) return false;
-        if (price != that.price) return false;
         if (!unitId.equals(that.unitId)) return false;
-        return date.equals(that.date);
+        if (!date.equals(that.date)) return false;
+        return price.equals(that.price);
     }
 
     @Override
@@ -87,7 +87,7 @@ public class ShopUnitPrice {
         int result = id;
         result = 31 * result + unitId.hashCode();
         result = 31 * result + date.hashCode();
-        result = 31 * result + price;
+        result = 31 * result + price.hashCode();
         return result;
     }
 

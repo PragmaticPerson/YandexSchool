@@ -3,6 +3,7 @@ package ru.yandex.goods.models;
 import com.sun.istack.Nullable;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -33,6 +34,8 @@ public class ShopUnitDB {
     private Set<ShopUnitDB> children;
 
     public ShopUnitDB() {
+        prices = new ArrayList<>();
+        prices.add(new ShopUnitPrice());
     }
 
     public ShopUnitDB(UUID id, String name, UUID parentId, ShopUnitType type, List<ShopUnitPrice> prices, Set<ShopUnitDB> children) {

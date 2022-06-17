@@ -1,6 +1,7 @@
 package ru.yandex.goods.models;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -130,5 +131,9 @@ public class ShopUnit {
                 ", price=" + price +
                 ", children=" + children +
                 '}';
+    }
+
+    public ShopUnitDB convertToShopUnitDB() {
+        return new ShopUnitDB(id, name, parentId, type, List.of(new ShopUnitPrice(0, id, date, price)), null);
     }
 }
