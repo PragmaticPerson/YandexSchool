@@ -29,7 +29,6 @@ public class ShopUnitService {
             );
             unitDB.setChildren(children);
         }
-
         return unitDB;
     }
 

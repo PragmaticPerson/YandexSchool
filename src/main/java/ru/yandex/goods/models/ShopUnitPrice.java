@@ -61,11 +61,11 @@ public class ShopUnitPrice {
         this.date = date;
     }
 
-    public int getPrice() {
+    public Integer getPrice() {
         return price;
     }
 
-    public void setPrice(int price) {
+    public void setPrice(Integer price) {
         this.price = price;
     }
 
@@ -79,7 +79,7 @@ public class ShopUnitPrice {
         if (id != that.id) return false;
         if (!unitId.equals(that.unitId)) return false;
         if (!date.equals(that.date)) return false;
-        return price.equals(that.price);
+        return price != null ? price.equals(that.price) : that.price == null;
     }
 
     @Override
@@ -87,7 +87,7 @@ public class ShopUnitPrice {
         int result = id;
         result = 31 * result + unitId.hashCode();
         result = 31 * result + date.hashCode();
-        result = 31 * result + price.hashCode();
+        result = 31 * result + (price != null ? price.hashCode() : 0);
         return result;
     }
 

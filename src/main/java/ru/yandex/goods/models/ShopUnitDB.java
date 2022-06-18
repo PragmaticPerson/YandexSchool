@@ -3,10 +3,7 @@ package ru.yandex.goods.models;
 import com.sun.istack.Nullable;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Entity
@@ -135,7 +132,10 @@ public class ShopUnitDB {
 
     public ShopUnit convertToShopUnit() {
         if (!prices.isEmpty()) {
-            ShopUnitPrice price = prices.get(0);
+            ShopUnitPrice price = prices.stream()
+                    .sorted(Comparator.comparing(ShopUnitPrice::getDate).reversed())
+                    .limit(1)
+                    .collect(Collectors.toList()).get(0);
             ShopUnit unit = new ShopUnit(id, name, price.getDate(), parentId, type, price.getPrice(), null);
             if (children != null && !children.isEmpty()) {
                 unit.setChildren(
