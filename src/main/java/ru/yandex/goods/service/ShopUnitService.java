@@ -6,19 +6,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import ru.yandex.goods.dao.ShopUnitRepository;
+import ru.yandex.goods.exceptions.NotFoundException;
+import ru.yandex.goods.exceptions.ValidationFailedException;
+import ru.yandex.goods.models.StatisticDates;
 import ru.yandex.goods.models.ShopUnit;
 import ru.yandex.goods.models.ShopUnitDB;
 import ru.yandex.goods.models.ShopUnitPrice;
 
-import javax.persistence.criteria.Fetch;
 import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
-import javax.transaction.Transactional;
-import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class ShopUnitService {
@@ -47,18 +43,28 @@ public class ShopUnitService {
         return unitDB;
     }
 
-    public List<ShopUnit> getShopUnitStatistic(UUID uuid, LocalDateTime start, LocalDateTime end) {
+    public List<ShopUnit> getShopUnitStatistic(UUID uuid, StatisticDates dates) {
         ShopUnitDB unitDB;
-        if (start == null || end == null) {
+
+        if (dates.isNull()) {
             unitDB = getShopUnitWithoutChildren(uuid);
+        } else if (dates.isOneNull()) {
+            throw new ValidationFailedException();
+        } else if (dates.isCorrect()) {
+            unitDB = Optional
+                    .ofNullable(jpa.findByIdAndDate(uuid, dates.getStart(), dates.getEnd()))
+                    .orElseThrow(NotFoundException::new);
         } else {
-            unitDB = jpa.findByIdAndDate(uuid, start, end);
+            throw new ValidationFailedException();
         }
+
         return unitDB.convertToShopUnitStatistic();
     }
 
     private ShopUnitDB getShopUnitWithoutChildren(UUID uuid) {
-        return jpa.findOne(where(idLike(uuid).and(joinPrices()))).get();
+        return jpa
+                .findOne(where(idLike(uuid).and(joinPrices())))
+                .orElseThrow(NotFoundException::new);
     }
 
     public ShopUnitDB save(ShopUnit unit) {
