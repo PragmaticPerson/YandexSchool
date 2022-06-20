@@ -10,8 +10,13 @@ import ru.yandex.goods.models.ShopUnit;
 import ru.yandex.goods.models.ShopUnitDB;
 import ru.yandex.goods.models.ShopUnitPrice;
 
+import javax.persistence.criteria.Fetch;
 import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
+import javax.transaction.Transactional;
+import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -25,17 +30,35 @@ public class ShopUnitService {
         this.jpa = jpa;
     }
 
-    public ShopUnitDB getShopUnitWithChildren(UUID uuid) {
-        ShopUnitDB unitDB = jpa.findAll(where(idLike(uuid).and(joinPrices()))).get(0);
+    public ShopUnit getShopUnitWithChildren(UUID uuid) {
+        return combineChildren(uuid).convertToShopUnit();
+    }
+
+    private ShopUnitDB combineChildren(UUID uuid) {
+        ShopUnitDB unitDB = getShopUnitWithoutChildren(uuid);
         Set<ShopUnitDB> children = new HashSet<>(jpa.findAll(where(parentIdLike(uuid).and(joinPrices()))));
 
         if (!children.isEmpty()) {
             children.forEach(u ->
-                    u.setChildren(getShopUnitWithChildren(u.getId()).getChildren())
+                    u.setChildren(combineChildren(u.getId()).getChildren())
             );
             unitDB.setChildren(children);
         }
         return unitDB;
+    }
+
+    public List<ShopUnit> getShopUnitStatistic(UUID uuid, LocalDateTime start, LocalDateTime end) {
+        ShopUnitDB unitDB;
+        if (start == null || end == null) {
+            unitDB = getShopUnitWithoutChildren(uuid);
+        } else {
+            unitDB = jpa.findByIdAndDate(uuid, start, end);
+        }
+        return unitDB.convertToShopUnitStatistic();
+    }
+
+    private ShopUnitDB getShopUnitWithoutChildren(UUID uuid) {
+        return jpa.findOne(where(idLike(uuid).and(joinPrices()))).get();
     }
 
     public ShopUnitDB save(ShopUnit unit) {

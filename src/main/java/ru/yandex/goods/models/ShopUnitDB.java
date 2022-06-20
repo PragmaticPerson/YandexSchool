@@ -23,7 +23,7 @@ public class ShopUnitDB {
     @Enumerated(EnumType.STRING)
     private ShopUnitType type;
 
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToMany(fetch = FetchType.EAGER)
     @JoinColumn(name = "unit_id", referencedColumnName = "id")
     private List<ShopUnitPrice> prices;
 
@@ -101,10 +101,10 @@ public class ShopUnitDB {
 
         if (!id.equals(shopUnitDB.id)) return false;
         if (!name.equals(shopUnitDB.name)) return false;
-        if (parentId != null ? !parentId.equals(shopUnitDB.parentId) : shopUnitDB.parentId != null) return false;
+        if (!Objects.equals(parentId, shopUnitDB.parentId)) return false;
         if (type != shopUnitDB.type) return false;
-        if (prices != null ? !prices.equals(shopUnitDB.prices) : shopUnitDB.prices != null) return false;
-        return children != null ? children.equals(shopUnitDB.children) : shopUnitDB.children == null;
+        if (!Objects.equals(prices, shopUnitDB.prices)) return false;
+        return Objects.equals(children, shopUnitDB.children);
     }
 
     @Override
@@ -136,7 +136,7 @@ public class ShopUnitDB {
                     .sorted(Comparator.comparing(ShopUnitPrice::getDate).reversed())
                     .limit(1)
                     .collect(Collectors.toList()).get(0);
-            ShopUnit unit = new ShopUnit(id, name, price.getDate(), parentId, type, price.getPrice(), null);
+            ShopUnit unit = new ShopUnit(id, name, price.getDate(), parentId, type, price.getPrice());
             if (children != null && !children.isEmpty()) {
                 unit.setChildren(
                         children.stream().map(ShopUnitDB::convertToShopUnit).collect(Collectors.toSet()));
@@ -144,5 +144,11 @@ public class ShopUnitDB {
             return unit;
         }
         return new ShopUnit();
+    }
+
+    public List<ShopUnit> convertToShopUnitStatistic() {
+        return prices.stream()
+                .map(price -> new ShopUnit(id, name, price.getDate(), parentId, type, price.getPrice()))
+                .collect(Collectors.toList());
     }
 }
