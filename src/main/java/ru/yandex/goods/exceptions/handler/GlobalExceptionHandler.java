@@ -2,6 +2,7 @@ package ru.yandex.goods.exceptions.handler;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
@@ -24,6 +25,11 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<Response> methodArgumentTypeMismatchHandler(MethodArgumentTypeMismatchException e) {
+        return validationFailedHandler(new ValidationFailedException());
+    }
+
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<Response> missingServletRequestParameterHandler(MissingServletRequestParameterException e) {
         return validationFailedHandler(new ValidationFailedException());
     }
 }
