@@ -7,6 +7,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.goods.models.ShopUnit;
 import ru.yandex.goods.models.ShopUnitImport;
+import ru.yandex.goods.models.ShopUnitStatistic;
 import ru.yandex.goods.models.StatisticDates;
 import ru.yandex.goods.service.ShopUnitService;
 
@@ -39,10 +40,20 @@ public class ShopOrientedRESTController {
     }
 
     @GetMapping("/nodes/{uuid}/statistic")
-    public List<ShopUnit> getShopUnitStatistic(
+    public List<ShopUnitStatistic> getShopUnitStatistic(
             @PathVariable UUID uuid,
             @RequestParam @Nullable @DateTimeFormat(pattern = FORMAT) LocalDateTime dateStart,
             @RequestParam @Nullable @DateTimeFormat(pattern = FORMAT) LocalDateTime dateEnd) {
         return service.getShopUnitStatistic(uuid, new StatisticDates(dateStart, dateEnd));
+    }
+
+    @DeleteMapping("/delete/{uuid}")
+    public void deleteShopUit(@PathVariable UUID uuid) {
+        service.delete(uuid);
+    }
+
+    @GetMapping("/sales")
+    public List<ShopUnitStatistic> salesGet(@RequestParam @DateTimeFormat(pattern = FORMAT) LocalDateTime date) {
+        return service.sales(date);
     }
 }

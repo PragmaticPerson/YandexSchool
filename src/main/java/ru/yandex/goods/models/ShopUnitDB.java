@@ -146,9 +146,9 @@ public class ShopUnitDB {
         return new ShopUnit();
     }
 
-    public List<ShopUnit> convertToShopUnitStatistic() {
+    public List<ShopUnitStatistic> convertToShopUnitStatistic() {
         return prices.stream()
-                .map(price -> new ShopUnit(id, name, price.getDate(), parentId, type, price.getPrice()))
+                .map(price -> new ShopUnitStatistic(id, name, price.getDate(), parentId, type, price.getPrice()))
                 .collect(Collectors.toList());
     }
 }

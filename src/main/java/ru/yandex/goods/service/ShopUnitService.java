@@ -1,15 +1,19 @@
 package ru.yandex.goods.service;
 
+import org.apache.tomcat.jni.Local;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.goods.dao.ShopUnitRepository;
 import ru.yandex.goods.exceptions.NotFoundException;
 import ru.yandex.goods.exceptions.ValidationFailedException;
+import ru.yandex.goods.models.ShopUnitStatistic;
 import ru.yandex.goods.models.StatisticDates;
 import ru.yandex.goods.models.ShopUnit;
 import ru.yandex.goods.models.ShopUnitDB;
 
+import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class ShopUnitService {
@@ -38,7 +42,7 @@ public class ShopUnitService {
         return unitDB;
     }
 
-    public List<ShopUnit> getShopUnitStatistic(UUID uuid, StatisticDates dates) {
+    public List<ShopUnitStatistic> getShopUnitStatistic(UUID uuid, StatisticDates dates) {
         ShopUnitDB unitDB;
 
         if (dates.isNull()) {
@@ -64,5 +68,16 @@ public class ShopUnitService {
 
     public ShopUnitDB save(ShopUnit unit) {
         return jpa.save(unit.convertToShopUnitDB());
+    }
+
+    public void delete(UUID uuid) {
+        jpa.deleteById(uuid);
+    }
+
+    public List<ShopUnitStatistic> sales(LocalDateTime date) {
+        List<ShopUnitStatistic> result = new ArrayList<>();
+        List<ShopUnitDB> units = jpa.findAllSales(date, date.plusDays(1));
+        units.forEach(u -> result.addAll(u.convertToShopUnitStatistic()));
+        return result;
     }
 }

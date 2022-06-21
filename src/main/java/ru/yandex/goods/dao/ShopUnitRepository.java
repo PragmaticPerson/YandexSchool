@@ -19,10 +19,13 @@ public interface ShopUnitRepository extends JpaRepository<ShopUnitDB, UUID> {
             "WHERE unit.id = ?1 AND price.date BETWEEN ?2 AND ?3")
     ShopUnitDB findByIdAndDate(UUID uuid, LocalDateTime dateStart, LocalDateTime dateEnd);
 
-    Optional<ShopUnitDB> findById(UUID id);
-
     @Query("SELECT unit " +
-            "FROM ShopUnitDB unit JOIN FETCH unit.prices " +
+            "FROM ShopUnitDB unit JOIN FETCH unit.prices price " +
             "WHERE unit.parentId = ?1")
     List<ShopUnitDB> findAllChildrenByParentId(UUID id);
+
+    @Query("SELECT DISTINCT unit " +
+            "FROM ShopUnitDB unit JOIN FETCH unit.prices price " +
+            "WHERE price.date BETWEEN ?1 and ?2")
+    List<ShopUnitDB> findAllSales(LocalDateTime dateStart, LocalDateTime dateEnd);
 }
