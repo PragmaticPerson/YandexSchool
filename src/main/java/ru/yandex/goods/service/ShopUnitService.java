@@ -1,6 +1,5 @@
 package ru.yandex.goods.service;
 
-import org.apache.tomcat.jni.Local;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.goods.dao.ShopUnitRepository;
@@ -13,7 +12,6 @@ import ru.yandex.goods.models.ShopUnitDB;
 
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class ShopUnitService {
