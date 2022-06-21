@@ -1,22 +1,21 @@
 package ru.yandex.goods.service;
 
+import static org.mockito.Mockito.*;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.yandex.goods.dao.ShopUnitRepository;
-import ru.yandex.goods.models.ShopUnit;
-import ru.yandex.goods.models.ShopUnitDB;
-import ru.yandex.goods.models.ShopUnitPrice;
-import ru.yandex.goods.models.ShopUnitType;
+import ru.yandex.goods.exceptions.ValidationFailedException;
+import ru.yandex.goods.models.*;
 
 import java.time.LocalDateTime;
 import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
 public class ShopUnitServiceTest {
@@ -68,23 +67,18 @@ public class ShopUnitServiceTest {
                         LocalDateTime.parse("2022-02-02T12:00:00.000"), 5000)), null)
         );
 
-        Mockito.when(shopUnitRepository.findById(ROOT_UUID)).thenReturn(Optional.of(ROOT_DB));
-        Mockito.when(shopUnitRepository.findById(NODE_UUID)).thenReturn(Optional.of(childrenOfRoot.get(0)));
-        Mockito.when(shopUnitRepository.findById(firstUUID)).thenReturn(Optional.of(childrenOfNode.get(0)));
-        Mockito.when(shopUnitRepository.findById(secondUUID)).thenReturn(Optional.of(childrenOfNode.get(1)));
+        lenient().when(shopUnitRepository.findById(ROOT_UUID)).thenReturn(Optional.of(ROOT_DB));
+        lenient().when(shopUnitRepository.findById(NODE_UUID)).thenReturn(Optional.of(childrenOfRoot.get(0)));
+        lenient().when(shopUnitRepository.findById(firstUUID)).thenReturn(Optional.of(childrenOfNode.get(0)));
+        lenient().when(shopUnitRepository.findById(secondUUID)).thenReturn(Optional.of(childrenOfNode.get(1)));
 
-        Mockito.when(shopUnitRepository.findAllChildrenByParentId(ROOT_UUID))
-                .thenReturn(childrenOfRoot);
-        Mockito.when(shopUnitRepository.findAllChildrenByParentId(NODE_UUID))
-                .thenReturn(childrenOfNode);
+        lenient().when(shopUnitRepository.findAllChildrenByParentId(ROOT_UUID)).thenReturn(childrenOfRoot);
+        lenient().when(shopUnitRepository.findAllChildrenByParentId(NODE_UUID)).thenReturn(childrenOfNode);
     }
 
     @Test
     void getShopUnitWithChildrenTest() {
         ShopUnit result = shopUnitService.getShopUnitWithChildren(ROOT_UUID);
-
-        System.out.println(result);
-
         ShopUnit expected = new ShopUnit(ROOT_UUID, "Root", LocalDateTime.parse("2022-02-04T12:00:00.000"),
                 null, ShopUnitType.CATEGORY, 5000, Set.of(
                 new ShopUnit(NODE_UUID, "Catalog", LocalDateTime.parse("2022-02-02T12:00:00.000"),
@@ -94,9 +88,52 @@ public class ShopUnitServiceTest {
                         new ShopUnit(secondUUID, "Xomiа Readme 10", LocalDateTime.parse("2022-02-02T12:00:00.000"),
                                 NODE_UUID, ShopUnitType.OFFER, 5000, null)
                 ))
-
         ));
 
         assertEquals(expected, result);
+    }
+
+    @Test
+    void getStatisticWithCorrectDatesTest() {
+        when(shopUnitRepository.findByIdAndDate(eq(ROOT_UUID), any(), any())).thenReturn(ROOT_DB);
+
+        List<ShopUnitStatistic> result = shopUnitService.getShopUnitStatistic(ROOT_UUID,
+                new StatisticDates(LocalDateTime.parse("2022-02-01T00:00:00.000"),
+                        LocalDateTime.parse("2022-02-02T12:00:00.000")));
+
+        List<ShopUnitStatistic> expected = List.of(
+                new ShopUnitStatistic(ROOT_UUID, "Root", LocalDateTime.parse("2022-02-01T12:00:00.000"),
+                        null, ShopUnitType.CATEGORY, 2500),
+                new ShopUnitStatistic(ROOT_UUID, "Root", LocalDateTime.parse("2022-02-04T12:00:00.000"),
+                        null, ShopUnitType.CATEGORY, 5000)
+        );
+
+        assertEquals(expected, result);
+    }
+
+    @Test
+    void getStatisticWhenWrongDatesTest() {
+        assertThrows(ValidationFailedException.class, () ->
+                shopUnitService.getShopUnitStatistic(ROOT_UUID,
+                        new StatisticDates(LocalDateTime.parse("2022-02-02T12:00:00.000"),
+                                LocalDateTime.parse("2022-02-01T12:00:00.000"))));
+    }
+
+    @Test
+    void getStatisticWhenNullDatesTest() {
+        assertThrows(ValidationFailedException.class, () ->
+                shopUnitService.getShopUnitStatistic(ROOT_UUID,
+                        new StatisticDates(null,
+                                LocalDateTime.parse("2022-02-01T12:00:00.000"))));
+
+        List<ShopUnitStatistic> result = shopUnitService.getShopUnitStatistic(ROOT_UUID, new StatisticDates(null, null));
+        List<ShopUnitStatistic> expected = List.of(
+                new ShopUnitStatistic(ROOT_UUID, "Root", LocalDateTime.parse("2022-02-01T12:00:00.000"),
+                        null, ShopUnitType.CATEGORY, 2500),
+                new ShopUnitStatistic(ROOT_UUID, "Root", LocalDateTime.parse("2022-02-04T12:00:00.000"),
+                        null, ShopUnitType.CATEGORY, 5000)
+        );
+
+        assertEquals(result, expected);
     }
 }

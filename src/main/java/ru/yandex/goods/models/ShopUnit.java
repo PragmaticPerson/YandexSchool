@@ -2,6 +2,7 @@ package ru.yandex.goods.models;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
@@ -102,10 +103,10 @@ public class ShopUnit {
         if (!id.equals(shopUnit.id)) return false;
         if (!name.equals(shopUnit.name)) return false;
         if (!date.equals(shopUnit.date)) return false;
-        if (parentId != null ? !parentId.equals(shopUnit.parentId) : shopUnit.parentId != null) return false;
+        if (!Objects.equals(parentId, shopUnit.parentId)) return false;
         if (type != shopUnit.type) return false;
-        if (price != null ? !price.equals(shopUnit.price) : shopUnit.price != null) return false;
-        return children != null ? children.equals(shopUnit.children) : shopUnit.children == null;
+        if (!Objects.equals(price, shopUnit.price)) return false;
+        return Objects.equals(children, shopUnit.children);
     }
 
     @Override
