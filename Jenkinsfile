@@ -6,7 +6,10 @@ pipeline {
     stages {
         stage('Build') {
             steps {
-                sh 'mvnw spring-boot:run'
+                sh '''
+                    cd /var/lib/jenkins/workspace/spring-boot
+                    mvnw spring-boot:run
+                '''
             }
         }
     }
