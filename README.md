@@ -1,4 +1,4 @@
-YandexSchool entrance task.
+Вступительное задание YandexSchool.
 
 # Описание #
 
